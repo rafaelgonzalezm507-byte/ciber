@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="cyber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerund &amp; Infinitive — Digital Carousel | OSCIDEC</title>
+<meta name="description" content="Carrusel digital interactivo: Gerund &amp; Infinitive aplicado a la ciberseguridad. English VI — Universidad del Istmo.">
+<link rel="icon" href="https://oscidec.com/portafolio/udelistmo.jpg">
+<link rel="apple-touch-icon" href="https://oscidec.com/portafolio/udelistmo.jpg">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@200;300;400;500;600;700;800&display=swap');
+
+/* ===== THEMES (variables) ===== */
+:root{
+  --bg:#0d1117; --bg2:#161b22; --card:rgba(22,27,34,.82); --border:#30363d;
+  --text:#c9d1d9; --muted:#8b949e; --heading:#ffffff;
+  --accent:#38bdf8; --accent2:#2dd4bf; --accent3:#a78bfa; --glow:rgba(56,189,248,.28);
+}
+html[data-theme="aurora"]{
+  --bg:#eef2f9; --bg2:#ffffff; --card:rgba(255,255,255,.92); --border:#dbe3ee;
+  --text:#334155; --muted:#64748b; --heading:#0f172a;
+  --accent:#6366f1; --accent2:#ec4899; --accent3:#0ea5e9; --glow:rgba(99,102,241,.22);
+}
+html[data-theme="sunset"]{
+  --bg:#1a1222; --bg2:#271a33; --card:rgba(43,29,56,.82); --border:#4b3a5a;
+  --text:#f3e8ff; --muted:#c4b5d6; --heading:#fff7ed;
+  --accent:#fb7185; --accent2:#fbbf24; --accent3:#c084fc; --glow:rgba(251,113,133,.28);
+}
+html[data-theme="forest"]{
+  --bg:#0a1f17; --bg2:#102a20; --card:rgba(16,42,32,.82); --border:#1f4a38;
+  --text:#d1fae5; --muted:#86b7a2; --heading:#f0fdf4;
+  --accent:#34d399; --accent2:#a3e635; --accent3:#22d3ee; --glow:rgba(52,211,153,.26);
+}
+
+*{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+  transition:background .4s ease,color .4s ease; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1; opacity:.6; transition:background .4s ease;
+  background:
+    radial-gradient(60vw 60vw at 12% 8%, var(--glow), transparent 60%),
+    radial-gradient(50vw 50vw at 90% 20%, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 60%),
+    radial-gradient(60vw 60vw at 70% 95%, color-mix(in srgb, var(--accent3) 18%, transparent), transparent 60%);
+}
+.code-font{font-family:'Fira Code',monospace;}
+.heading{color:var(--heading);}
+.muted{color:var(--muted);}
+.surface{background:var(--card); border:1px solid var(--border); backdrop-filter:blur(10px);}
+.accent{color:var(--accent);}
+.btn{transition:transform .12s ease, box-shadow .2s ease, background .3s ease;}
+.btn:hover{transform:translateY(-3px);}
+.btn:active{transform:translateY(2px);}
+
+/* 3D jumping chips */
+@keyframes osJump{0%,100%{transform:translateY(0);}45%{transform:translateY(-9px);}60%{transform:translateY(-3px);}}
+.chip3d{display:inline-block; padding:8px 16px; border-radius:11px; font-weight:800; font-size:.72rem;
+  letter-spacing:.5px; text-transform:uppercase; margin:6px; color:#fff; animation:osJump 2.4s ease-in-out infinite;
+  box-shadow:0 5px 0 rgba(0,0,0,.35), 0 8px 16px rgba(0,0,0,.4);}
+.chip3d:nth-child(2){animation-delay:.3s;} .chip3d:nth-child(3){animation-delay:.6s;} .chip3d:nth-child(4){animation-delay:.9s;}
+.c-cy{background:linear-gradient(135deg,#0ea5e9,#0369a1);} .c-tl{background:linear-gradient(135deg,#2dd4bf,#0d9488); color:#042f2e;}
+.c-am{background:linear-gradient(135deg,#fbbf24,#d97706); color:#1c1917;} .c-rs{background:linear-gradient(135deg,#fb7185,#e11d48);}
+.c-vi{background:linear-gradient(135deg,#818cf8,#4f46e5);} .c-gr{background:linear-gradient(135deg,#4ade80,#16a34a); color:#052e16;}
+
+/* carousel */
+.carousel-track{display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.slide{min-width:100%; box-sizing:border-box;}
+.glow{box-shadow:0 0 22px var(--glow);}
+
+/* ===== 3D STAGE (carousel + tilt) ===== */
+.stage3d{perspective:1600px;}
+.carousel-track .slide{transition:transform .45s ease, opacity .45s ease; transform-style:preserve-3d;}
+.carousel-track .slide:not(.is-active){transform:rotateY(8deg) scale(.94); opacity:.35; filter:blur(1px);}
+.carousel-track .slide.is-active{transform:rotateY(0) scale(1); opacity:1;}
+.tilt{transition:transform .25s ease, box-shadow .25s ease; transform-style:preserve-3d; will-change:transform;}
+.tilt:hover{box-shadow:0 18px 40px rgba(0,0,0,.45);}
+.chip3d:hover{transform:translateY(-6px) scale(1.08) rotate(-2deg);}
+
+/* ===== JUMPING BUTTONS ===== */
+@keyframes btnJump{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.jump{animation:btnJump 1.8s ease-in-out infinite;}
+.jump:nth-of-type(2){animation-delay:.25s;} .jump:nth-of-type(3){animation-delay:.5s;} .jump:nth-of-type(4){animation-delay:.75s;}
+.jump:hover{animation-play-state:paused; transform:translateY(-4px) scale(1.04);}
+
+/* ===== CSS BAR CHART ===== */
+.bar-row{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.bar-label{width:120px;font-size:.78rem;}
+.bar-track{flex:1;height:16px;border-radius:10px;background:var(--border);overflow:hidden;}
+.bar-fill{height:100%;border-radius:10px;width:0;transition:width 1.1s cubic-bezier(.4,0,.2,1);}
+.donut{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;
+  background:conic-gradient(var(--accent) 0 60%, var(--accent2) 60% 85%, var(--accent3) 85% 100%);}
+.donut-hole{width:92px;height:92px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-weight:800;}
+
+/* sidebar */
+#sidebar{transition:transform .35s ease;}
+.sb-link{transition:background .2s ease,color .2s ease;}
+.sb-link:hover{background:color-mix(in srgb,var(--accent) 16%,transparent); color:var(--accent);}
+
+/* chatbot */
+#chatPanel{transition:transform .3s ease, opacity .3s ease;}
+.msg-in{animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin:0 1px;animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+/* faq */
+.faq-a{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.faq-item.open .faq-a{max-height:320px;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);}
+.faq-chevron{transition:transform .3s ease;}
+
+/* search results */
+.search-hit{cursor:pointer;}
+.search-hit:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);}
+
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+</style>
+</head>
+<body class="min-h-screen">
+<!-- ===== SIDEBAR ===== -->
+<div id="overlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 z-40 hidden"></div>
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-72 max-w-[85vw] z-50 surface -translate-x-full flex flex-col shadow-2xl">
+  <div class="flex items-center gap-3 p-4 border-b" style="border-color:var(--border)">
+    <img src="https://oscidec.com/portafolio/udelistmo.jpg" alt="Universidad del Istmo" class="w-11 h-11 rounded-lg object-cover border" style="border-color:var(--border)">
+    <div>
+      <p class="text-sm font-bold heading leading-tight">Universidad del Istmo</p>
+      <p class="text-[11px] muted">English VI • Ciberseguridad</p>
+    </div>
+    <button onclick="toggleSidebar(false)" class="ml-auto muted text-xl" aria-label="Cerrar menú"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <nav class="flex-1 p-3 space-y-1 text-sm">
+    <a href="#inicio" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-house w-5 accent"></i> Inicio</a>
+    <a href="#carrusel" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-layer-group w-5 accent"></i> Carrusel (10)</a>
+    <a href="#brief" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-clipboard-check w-5 accent"></i> Assignment</a>
+    <a href="#examples" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-language w-5 accent"></i> Examples</a>
+    <a href="#charts" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-chart-column w-5 accent"></i> Charts</a>
+    <a href="#galeria" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-images w-5 accent"></i> Galería</a>
+    <a href="#recursos" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-film w-5 accent"></i> Videos</a>
+    <a href="#faq" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-circle-question w-5 accent"></i> FAQ</a>
+    <a href="#portafolio" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-user-astronaut w-5 accent"></i> Portfolio</a>
+    <a href="#plataformas" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-diagram-project w-5 accent"></i> Plataformas</a>
+    <a href="#contacto" onclick="toggleSidebar(false)" class="sb-link flex items-center gap-3 px-3 py-2.5 rounded-lg"><i class="fa-solid fa-headset w-5 accent"></i> Contacto</a>
+  </nav>
+  <div class="p-3 border-t space-y-2" style="border-color:var(--border)">
+    <a href="https://ingles.oscidec.com" target="_blank" rel="noopener noreferrer" class="btn block text-center bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-sm py-2.5 rounded-xl"><i class="fa-solid fa-language mr-1"></i> ingles.oscidec.com</a>
+    <a href="https://wa.me/50767600882" target="_blank" rel="noopener noreferrer" class="btn block text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-sm py-2.5 rounded-xl"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp 6760-0882</a>
+  </div>
+</aside>
+
+<!-- ===== LAYOUT WRAPPER ===== -->
+<div class="max-w-5xl mx-auto">
+<div class="min-w-0">
+<!-- ===== HEADER / NAVBAR ===== -->
+<header id="inicio" class="sticky top-0 z-30 surface border-b px-3 sm:px-5 py-3" style="border-color:var(--border)">
+  <div class="flex items-center gap-3">
+    <button onclick="toggleSidebar(true)" class="btn flex items-center gap-2 bg-gradient-to-r from-sky-500 to-cyan-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg" aria-label="Abrir menú"><i class="fa-solid fa-bars text-base"></i> <span class="hidden sm:inline">Menú</span></button>
+    <div class="flex items-center gap-2 min-w-0">
+      <i class="fa-solid fa-shield-halved accent text-2xl"></i>
+      <div class="min-w-0 hidden sm:block">
+        <h1 class="text-sm sm:text-base font-extrabold heading tracking-wide truncate">GERUND &amp; INFINITIVE</h1>
+        <p class="text-[11px] muted truncate">Digital Carousel • Cybersecurity Edition</p>
+      </div>
+    </div>
+
+    <!-- Buscador interno con lupa SVG -->
+    <div class="relative ml-auto w-36 sm:w-64">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 muted pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </span>
+      <input id="searchInput" type="text" autocomplete="off" placeholder="Buscar en el carrusel…"
+        oninput="runSearch(this.value)" onfocus="runSearch(this.value)"
+        class="w-full surface rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:ring-2" style="--tw-ring-color:var(--accent)">
+      <div id="searchResults" class="absolute top-full mt-2 w-full surface rounded-xl overflow-hidden hidden z-40 max-h-72 overflow-y-auto"></div>
+    </div>
+
+    <!-- Botón cambiar color / tema -->
+    <button onclick="cycleTheme()" title="Cambiar color de la página" class="btn shrink-0 w-10 h-10 rounded-xl surface flex items-center justify-center accent">
+      <i class="fa-solid fa-palette"></i>
+    </button>
+  </div>
+  <!-- theme pills -->
+  <div class="flex items-center gap-2 mt-2 text-[11px] muted">
+    <span>Tema:</span>
+    <button onclick="setTheme('cyber')" class="w-5 h-5 rounded-full border-2 border-white/30" style="background:#38bdf8" title="Cyber"></button>
+    <button onclick="setTheme('aurora')" class="w-5 h-5 rounded-full border-2 border-white/30" style="background:#6366f1" title="Aurora (claro)"></button>
+    <button onclick="setTheme('sunset')" class="w-5 h-5 rounded-full border-2 border-white/30" style="background:#fb7185" title="Sunset"></button>
+    <button onclick="setTheme('forest')" class="w-5 h-5 rounded-full border-2 border-white/30" style="background:#34d399" title="Forest"></button>
+    <span id="themeName" class="ml-1 accent font-semibold">Cyber</span>
+  </div>
+</header>
+<main class="px-3 sm:px-5 pb-16">
+
+<!-- ===== HERO ===== -->
+<section class="surface rounded-2xl p-5 sm:p-8 mt-5 glow overflow-hidden relative">
+  <div class="flex flex-col md:flex-row items-center gap-6">
+    <!-- Foto de perfil (cargada como binario / blob) -->
+    <div class="relative shrink-0">
+      <img id="perfilImg" alt="Foto de perfil" class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 glow" style="border-color:var(--accent)">
+      <span class="absolute -bottom-2 -right-2 bg-gradient-to-r from-sky-500 to-cyan-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg">English VI</span>
+    </div>
+    <div class="text-center md:text-left flex-1">
+      <span class="code-font text-xs uppercase tracking-widest accent">Digital Carousel • Cybersecurity Engineering</span>
+      <h2 class="text-3xl sm:text-5xl font-extrabold heading mt-1 leading-tight">Gerund &amp; Infinitive</h2>
+      <p class="muted mt-2 text-sm sm:text-base">Diferencia, usos y aplicación en contexto — explicado de forma clara, ordenada y visual.</p>
+      <div class="flex flex-wrap gap-2 justify-center md:justify-start mt-4 text-xs code-font">
+        <span class="surface px-3 py-1.5 rounded-lg"><span class="accent">Student:</span> Rafael Martín González Mojica</span>
+        <span class="surface px-3 py-1.5 rounded-lg"><span class="accent">Professor:</span> Miguel Fernando Sánchez Pérez</span>
+        <span class="surface px-3 py-1.5 rounded-lg"><span class="accent">Course:</span> English VI • Cybersecurity Engineering</span>
+        <span class="surface px-3 py-1.5 rounded-lg"><span class="accent">Group:</span> VIRTUAL-1471 • 2026-3-A</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- logos + dirección del proyecto -->
+  <div class="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t" style="border-color:var(--border)">
+    <div class="flex items-center gap-3">
+      <img src="https://oscidec.com/portafolio/udelistmo.jpg" alt="Logo Universidad del Istmo" class="w-12 h-12 rounded-lg object-cover border" style="border-color:var(--border)">
+      <span class="text-xs muted">Universidad<br>del Istmo</span>
+    </div>
+    <span class="muted hidden sm:inline">•</span>
+    <a href="https://oscidec.com" target="_blank" rel="noopener noreferrer" class="btn flex items-center gap-3 surface rounded-xl px-3 py-2">
+      <img src="https://oscidec.com/portafolio/oscidec.jpg" alt="Logo OSCIDEC" class="w-12 h-12 rounded-lg object-cover border" style="border-color:var(--accent)">
+      <span class="text-left">
+        <span class="block text-sm font-bold heading">OSCIDEC</span>
+        <span class="block text-xs accent">https://oscidec.com <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></span>
+      </span>
+    </a>
+    <a href="https://ingles.oscidec.com" target="_blank" rel="noopener noreferrer" class="btn sm:ml-auto bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl"><i class="fa-solid fa-language mr-1"></i> Ir a Inglés</a>
+  </div>
+</section>
+<!-- ===== CARRUSEL ===== -->
+<section id="carrusel" class="mt-8">
+  <div class="flex items-center gap-2 mb-3">
+    <i class="fa-solid fa-layer-group accent"></i>
+    <h3 class="text-lg font-bold heading">Carrusel digital · 10 tarjetas</h3>
+    <span id="slideCounter" class="ml-auto text-xs code-font muted">01 / 10</span>
+  </div>
+
+  <article class="stage3d relative overflow-hidden rounded-2xl surface glow p-5 sm:p-9 min-h-[520px] flex flex-col justify-between">
+    <div id="carouselTrack" class="carousel-track">
+
+      <!-- CARD 1: COVER -->
+      <div class="slide flex flex-col justify-center items-center text-center space-y-5 px-2" data-title="Cover – Portada" data-kw="cover portada gerund infinitive english vi">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center border-2 glow" style="border-color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,transparent)"><i class="fa-solid fa-lock text-4xl accent"></i></div>
+        <div>
+          <span class="accent code-font text-xs uppercase tracking-widest">Card 01 / Cover</span>
+          <h2 class="text-3xl sm:text-5xl font-extrabold heading mt-1">Gerund &amp; Infinitive</h2>
+          <p class="muted mt-2">Applied to Cybersecurity Engineering</p>
+        </div>
+        <div class="surface p-4 rounded-xl max-w-md w-full text-left text-sm code-font space-y-1">
+          <p><span class="accent">Student:</span> Rafael Martín González Mojica</p>
+          <p><span class="accent">Professor:</span> Miguel Fernando Sánchez Pérez</p>
+          <p><span class="accent">Course:</span> English VI</p>
+          <p><span class="accent">Program:</span> B.Sc. Cybersecurity Engineering</p>
+          <p><span class="accent">Subject:</span> Advanced Grammar in Context</p>
+        </div>
+      </div>
+
+      <!-- CARD 2: GERUND DEFINITION -->
+      <div class="slide flex flex-col justify-center space-y-5 px-2" data-title="Gerund: Definition" data-kw="gerund definition -ing noun encrypting analyzing">
+        <div><span class="accent code-font text-xs uppercase tracking-widest">Card 02 / Grammar Foundation</span><h2 class="text-2xl sm:text-4xl font-bold heading mt-1">Gerund: Definition</h2></div>
+        <p class="text-base leading-relaxed">A <strong class="accent">gerund</strong> is a verb form ending in <code class="surface accent px-2 py-0.5 rounded code-font">-ing</code> that works as a <strong>noun</strong> in the sentence.</p>
+        <div class="surface p-4 rounded-lg border-l-4 code-font text-sm" style="border-color:var(--accent)"><p class="accent font-bold mb-1">Formula:</p><p class="heading">Base Verb + -ing <span class="muted">(Encrypting, Hacking, Monitoring)</span></p></div>
+        <div class="space-y-2"><p class="text-sm font-semibold muted uppercase tracking-wider">Examples:</p><ul class="list-disc list-inside space-y-1"><li><strong class="accent">Encrypting</strong> confidential data prevents unauthorized access.</li><li>Our SOC team enjoys <strong class="accent">analyzing</strong> security logs.</li></ul></div>
+      </div>
+
+      <!-- CARD 3: USES OF GERUND -->
+      <div class="slide flex flex-col justify-center space-y-5 px-2" data-title="Uses of the Gerund" data-kw="uses gerund subject object preposition expression">
+        <div><span class="accent code-font text-xs uppercase tracking-widest">Card 03 / Grammar Rules</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Uses of the Gerund</h2></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="surface p-3 rounded"><h4 class="accent font-bold mb-1">1. As Subject</h4><p><em>Penetration testing</em> requires advanced technical skills.</p></div>
+          <div class="surface p-3 rounded"><h4 class="accent font-bold mb-1">2. Object of certain verbs</h4><p>The team finished <em>patching</em> the system vulnerability.</p></div>
+          <div class="surface p-3 rounded"><h4 class="accent font-bold mb-1">3. After prepositions</h4><p>He gained access by <em>bypassing</em> two-factor authentication.</p></div>
+          <div class="surface p-3 rounded"><h4 class="accent font-bold mb-1">4. Common expressions</h4><p>We are looking forward to <em>upgrading</em> our firewall.</p></div>
+        </div>
+      </div>
+
+      <!-- CARD 4: VERBS + GERUND -->
+      <div class="slide flex flex-col justify-center space-y-4 px-2" data-title="Verbs Followed by Gerunds" data-kw="verbs gerund avoid consider enjoy finish keep mind practise risk suggest">
+        <div><span class="accent code-font text-xs uppercase tracking-widest">Card 04 / Vocabulary</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Verbs Followed by Gerunds</h2></div>
+        <div class="flex flex-wrap gap-2"><span class="surface accent text-xs px-2.5 py-1 rounded">avoid</span><span class="surface accent text-xs px-2.5 py-1 rounded">consider</span><span class="surface accent text-xs px-2.5 py-1 rounded">enjoy</span><span class="surface accent text-xs px-2.5 py-1 rounded">finish</span><span class="surface accent text-xs px-2.5 py-1 rounded">keep</span><span class="surface accent text-xs px-2.5 py-1 rounded">mind</span><span class="surface accent text-xs px-2.5 py-1 rounded">practise</span><span class="surface accent text-xs px-2.5 py-1 rounded">suggest</span><span class="surface accent text-xs px-2.5 py-1 rounded">risk</span></div>
+        <div class="space-y-2 text-sm">
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent)"><strong class="accent">Avoid:</strong> System administrators must <em class="heading">avoid using</em> default credentials.</div>
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent)"><strong class="accent">Risk:</strong> Companies <em class="heading">risk losing</em> sensitive records without encryption.</div>
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent)"><strong class="accent">Suggest:</strong> The auditor <em class="heading">suggested enabling</em> multi-factor authentication.</div>
+        </div>
+      </div>
+
+      <!-- CARD 5: INFINITIVE DEFINITION -->
+      <div class="slide flex flex-col justify-center space-y-5 px-2" data-title="Infinitive: Definition" data-kw="infinitive definition to base verb secure fix update">
+        <div><span class="code-font text-xs uppercase tracking-widest" style="color:var(--accent2)">Card 05 / Grammar Foundation</span><h2 class="text-2xl sm:text-4xl font-bold heading mt-1">Infinitive: Definition</h2></div>
+        <p class="text-base leading-relaxed">An <strong style="color:var(--accent2)">infinitive</strong> is the base verb preceded by the particle <code class="surface px-2 py-0.5 rounded code-font" style="color:var(--accent2)">to</code>.</p>
+        <div class="surface p-4 rounded-lg border-l-4 code-font text-sm" style="border-color:var(--accent2)"><p class="font-bold mb-1" style="color:var(--accent2)">Formula:</p><p class="heading">To + Base Form <span class="muted">(to secure, to fix, to update)</span></p></div>
+        <div class="space-y-2"><p class="text-sm font-semibold muted uppercase tracking-wider">Examples:</p><ul class="list-disc list-inside space-y-1"><li>Our main objective is <strong style="color:var(--accent2)">to secure</strong> user privacy.</li><li>The developer decided <strong style="color:var(--accent2)">to rewrite</strong> the insecure code.</li></ul></div>
+      </div>
+      <!-- CARD 6: USES OF INFINITIVE -->
+      <div class="slide flex flex-col justify-center space-y-5 px-2" data-title="Uses of the Infinitive" data-kw="uses infinitive purpose adjective question word">
+        <div><span class="code-font text-xs uppercase tracking-widest" style="color:var(--accent2)">Card 06 / Grammar Rules</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Uses of the Infinitive</h2></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="surface p-3 rounded"><h4 class="font-bold mb-1" style="color:var(--accent2)">1. After certain verbs</h4><p>We hope <em>to eliminate</em> system vulnerabilities soon.</p></div>
+          <div class="surface p-3 rounded"><h4 class="font-bold mb-1" style="color:var(--accent2)">2. Purpose (Why?)</h4><p>I ran the script <em>to scan</em> for open ports.</p></div>
+          <div class="surface p-3 rounded"><h4 class="font-bold mb-1" style="color:var(--accent2)">3. After adjectives</h4><p>It is essential <em>to update</em> security definitions daily.</p></div>
+          <div class="surface p-3 rounded"><h4 class="font-bold mb-1" style="color:var(--accent2)">4. After question words</h4><p>New users learn how <em>to configure</em> their VPN.</p></div>
+        </div>
+      </div>
+
+      <!-- CARD 7: VERBS + INFINITIVE -->
+      <div class="slide flex flex-col justify-center space-y-4 px-2" data-title="Verbs Followed by Infinitives" data-kw="verbs infinitive agree decide expect hope learn plan promise want">
+        <div><span class="code-font text-xs uppercase tracking-widest" style="color:var(--accent2)">Card 07 / Vocabulary</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Verbs Followed by Infinitives</h2></div>
+        <div class="flex flex-wrap gap-2"><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">agree</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">decide</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">expect</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">hope</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">learn</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">plan</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">promise</span><span class="surface text-xs px-2.5 py-1 rounded" style="color:var(--accent2)">want</span></div>
+        <div class="space-y-2 text-sm">
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent2)"><strong style="color:var(--accent2)">Plan:</strong> We <em class="heading">plan to perform</em> a network security audit this Friday.</div>
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent2)"><strong style="color:var(--accent2)">Decide:</strong> Management <em class="heading">decided to implement</em> zero-trust policies.</div>
+          <div class="surface p-3 rounded border-l-2" style="border-color:var(--accent2)"><strong style="color:var(--accent2)">Promise:</strong> The vendor <em class="heading">promises to patch</em> zero-day exploits promptly.</div>
+        </div>
+      </div>
+
+      <!-- CARD 8: COMPARISON -->
+      <div class="slide flex flex-col justify-center space-y-4 px-2" data-title="Gerund vs. Infinitive" data-kw="comparison gerund vs infinitive stop remember">
+        <div><span class="code-font text-xs uppercase tracking-widest" style="color:var(--accent3)">Card 08 / Comparison</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Gerund vs. Infinitive</h2></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="surface p-3 rounded"><span class="font-bold accent">Gerund (action focus):</span><p class="mt-1">She enjoys <strong class="heading">testing</strong> web applications.</p></div>
+          <div class="surface p-3 rounded"><span class="font-bold" style="color:var(--accent2)">Infinitive (intent focus):</span><p class="mt-1">She wants <strong class="heading">to test</strong> web applications.</p></div>
+        </div>
+        <div class="surface p-3 rounded text-sm space-y-1 border" style="border-color:var(--accent3)">
+          <p class="font-bold" style="color:var(--accent3)">Same verb, different meaning: STOP</p>
+          <p>1. <strong class="accent">Stop + gerund</strong> (quit): “They stopped <em>using</em> outdated SSL protocols.” <span class="muted">(discontinued it)</span></p>
+          <p>2. <strong style="color:var(--accent2)">Stop + infinitive</strong> (pause for a purpose): “The specialist stopped <em>to check</em> the server status.” <span class="muted">(paused in order to check)</span></p>
+        </div>
+      </div>
+
+      <!-- CARD 9: PRACTICE -->
+      <div class="slide flex flex-col justify-center space-y-3 px-2" data-title="Practice / Challenge" data-kw="practice quiz challenge exercise answers">
+        <div><span class="code-font text-xs uppercase tracking-widest" style="color:#fbbf24">Card 09 / Interactive Quiz</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">Cybersecurity Challenge</h2></div>
+        <p class="text-xs muted">Choose the correct form, then reveal the answers:</p>
+        <div class="space-y-2 text-sm code-font">
+          <div class="surface p-2.5 rounded flex justify-between items-center gap-3"><span>1. The engineer decided ______ (deploy) the firewall patch.</span><span class="font-bold hidden answer" style="color:#fbbf24">to deploy</span></div>
+          <div class="surface p-2.5 rounded flex justify-between items-center gap-3"><span>2. Analysts recommend ______ (backup) databases daily.</span><span class="font-bold hidden answer" style="color:#fbbf24">backing up</span></div>
+          <div class="surface p-2.5 rounded flex justify-between items-center gap-3"><span>3. We use honeypots for ______ (detect) malicious traffic.</span><span class="font-bold hidden answer" style="color:#fbbf24">detecting</span></div>
+          <div class="surface p-2.5 rounded flex justify-between items-center gap-3"><span>4. The admin stopped ______ (check) the intrusion alert.</span><span class="font-bold hidden answer" style="color:#fbbf24">to check</span></div>
+          <div class="surface p-2.5 rounded flex justify-between items-center gap-3"><span>5. She avoids ______ (open) suspicious email links.</span><span class="font-bold hidden answer" style="color:#fbbf24">opening</span></div>
+        </div>
+        <button onclick="toggleAnswers()" class="btn self-start text-xs border px-3 py-1.5 rounded" style="color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,.12)"><i class="fa-solid fa-key mr-1"></i> Mostrar / Ocultar respuestas</button>
+      </div>
+
+      <!-- CARD 10: REFERENCES -->
+      <div class="slide flex flex-col justify-center space-y-4 px-2" data-title="References" data-kw="references sources murphy easttom british council bibliography">
+        <div><span class="code-font text-xs uppercase tracking-widest muted">Card 10 / Academic Sources</span><h2 class="text-2xl sm:text-3xl font-bold heading mt-1">References &amp; Resources</h2></div>
+        <div class="space-y-3 text-sm">
+          <div class="surface p-3 rounded"><p class="font-semibold heading">Murphy, R. (2019).</p><p class="muted"><em>English Grammar in Use</em> (5th ed.). Cambridge University Press.</p></div>
+          <div class="surface p-3 rounded"><p class="font-semibold heading">Easttom, C. (2021).</p><p class="muted"><em>Computer Security Fundamentals</em> (4th ed.). Pearson Education.</p></div>
+          <div class="surface p-3 rounded"><p class="font-semibold heading">British Council — LearnEnglish.</p><p class="muted">Verbs followed by '-ing' or infinitive: reference guidelines.</p></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Controls -->
+    <div class="flex justify-between items-center mt-6 gap-3">
+      <button id="prevBtn" onclick="moveSlide(-1)" class="btn surface px-4 py-2 rounded-lg text-sm flex items-center gap-2 disabled:opacity-40"><i class="fa-solid fa-chevron-left"></i> <span class="hidden sm:inline">Anterior</span></button>
+      <div id="indicators" class="flex gap-1.5 flex-wrap justify-center"></div>
+      <button id="nextBtn" onclick="moveSlide(1)" class="btn bg-gradient-to-r from-sky-500 to-cyan-600 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 disabled:opacity-40"><span class="hidden sm:inline">Siguiente</span> <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </article>
+  <p class="text-center text-[11px] muted mt-2">Usa las flechas ← → del teclado para navegar • arrastra en móvil.</p>
+</section>
+<!-- ===== ASSIGNMENT BRIEF (what the professor asks) ===== -->
+<section id="brief" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-clipboard-check accent"></i><h3 class="text-lg font-bold heading">Assignment Brief &mdash; Prof. Miguel Fernando Sánchez Pérez</h3></div>
+  <article class="surface rounded-2xl p-5 tilt space-y-4 text-sm leading-relaxed">
+    <p><strong class="accent">Topic:</strong> Gerund &amp; Infinitive &mdash; Digital Carousel (8–10 slides).</p>
+    <p><strong class="accent">Objective:</strong> Students will be able to <em>differentiate</em> between gerunds and infinitives, <em>explain</em> their main grammatical uses, and <em>apply</em> them accurately in context through original examples, presented in a clear, organized and visually engaging digital carousel.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="surface p-3 rounded-lg"><h4 class="accent font-bold mb-1">What it must include</h4><ul class="list-disc list-inside space-y-1 muted"><li>Clear definition &amp; formation of both forms</li><li>Main uses with one example each</li><li>Common verbs followed by gerunds / infinitives</li><li>A Gerund vs. Infinitive comparison</li><li>A short practice / challenge activity</li><li>References &amp; identification information</li></ul></div>
+      <div class="surface p-3 rounded-lg"><h4 class="accent font-bold mb-1">Grading criteria</h4><ul class="list-disc list-inside space-y-1 muted"><li>Grammar content &amp; accuracy — 40%</li><li>Examples &amp; application — 20%</li><li>Organisation &amp; clarity — 15%</li><li>Carousel design / readability — 10%</li><li>Oral explanation &amp; command — 15%</li></ul></div>
+    </div>
+    <p class="text-xs muted"><i class="fa-regular fa-clock mr-1"></i> Available: Oct 16 – Oct 25, 23:59 · Worth 100 points.</p>
+  </article>
+</section>
+
+<!-- ===== MORE ENGLISH EXAMPLES ===== -->
+<section id="examples" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-language accent"></i><h3 class="text-lg font-bold heading">More English Examples in Context</h3></div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="surface rounded-2xl p-4 tilt">
+      <h4 class="font-bold accent mb-2"><i class="fa-solid fa-i-cursor mr-1"></i> Gerund (verb + -ing)</h4>
+      <ul class="space-y-2 text-sm">
+        <li><b class="accent">Monitoring</b> the network 24/7 is part of the SOC routine.</li>
+        <li>The analyst recommends <b class="accent">updating</b> all endpoints weekly.</li>
+        <li>We cannot risk <b class="accent">exposing</b> the database to the internet.</li>
+        <li>They kept <b class="accent">scanning</b> the servers until midnight.</li>
+        <li>He is good at <b class="accent">detecting</b> phishing emails.</li>
+        <li>Before <b class="accent">deploying</b>, the team tested the firewall rules.</li>
+      </ul>
+    </div>
+    <div class="surface rounded-2xl p-4 tilt">
+      <h4 class="font-bold mb-2" style="color:var(--accent2)"><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Infinitive (to + base verb)</h4>
+      <ul class="space-y-2 text-sm">
+        <li>Our goal is <b style="color:var(--accent2)">to protect</b> every user's data.</li>
+        <li>The company decided <b style="color:var(--accent2)">to adopt</b> a zero-trust model.</li>
+        <li>We installed sensors <b style="color:var(--accent2)">to detect</b> intrusions early.</li>
+        <li>It is important <b style="color:var(--accent2)">to back up</b> critical systems daily.</li>
+        <li>The engineer learned how <b style="color:var(--accent2)">to configure</b> the VPN.</li>
+        <li>They promised <b style="color:var(--accent2)">to patch</b> the vulnerability today.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="surface rounded-2xl p-4 mt-4 tilt text-sm">
+    <h4 class="font-bold mb-2" style="color:var(--accent3)">Verbs that take BOTH forms (meaning changes)</h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="surface p-3 rounded"><b style="color:var(--accent3)">remember</b><p class="muted mt-1">"Remember <i>to lock</i> the server room" (don't forget) vs "I remember <i>locking</i> it" (a past memory).</p></div>
+      <div class="surface p-3 rounded"><b style="color:var(--accent3)">stop</b><p class="muted mt-1">"Stop <i>using</i> weak passwords" (quit) vs "Stop <i>to check</i> the logs" (pause for a purpose).</p></div>
+      <div class="surface p-3 rounded"><b style="color:var(--accent3)">try</b><p class="muted mt-1">"Try <i>resetting</i> the router" (experiment) vs "Try <i>to reset</i> the router" (make an effort).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GRAMMAR IN NUMBERS (charts) ===== -->
+<section id="charts" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-chart-column accent"></i><h3 class="text-lg font-bold heading">Grammar in Numbers &mdash; Visual Charts</h3></div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="surface rounded-2xl p-5 tilt lg:col-span-2">
+      <h4 class="font-bold heading mb-3 text-sm">How often each verb is followed by a gerund <span class="muted">(sample corpus)</span></h4>
+      <div class="bar-row"><span class="bar-label">enjoy</span><div class="bar-track"><div class="bar-fill" data-w="95%" style="background:var(--accent)"></div></div><span class="text-xs muted">95%</span></div>
+      <div class="bar-row"><span class="bar-label">avoid</span><div class="bar-track"><div class="bar-fill" data-w="90%" style="background:var(--accent)"></div></div><span class="text-xs muted">90%</span></div>
+      <div class="bar-row"><span class="bar-label">finish</span><div class="bar-track"><div class="bar-fill" data-w="88%" style="background:var(--accent)"></div></div><span class="text-xs muted">88%</span></div>
+      <div class="bar-row"><span class="bar-label">practise</span><div class="bar-track"><div class="bar-fill" data-w="80%" style="background:var(--accent2)"></div></div><span class="text-xs muted">80%</span></div>
+      <div class="bar-row"><span class="bar-label">suggest</span><div class="bar-track"><div class="bar-fill" data-w="76%" style="background:var(--accent2)"></div></div><span class="text-xs muted">76%</span></div>
+      <div class="bar-row"><span class="bar-label">consider</span><div class="bar-track"><div class="bar-fill" data-w="72%" style="background:var(--accent2)"></div></div><span class="text-xs muted">72%</span></div>
+    </div>
+    <div class="surface rounded-2xl p-5 tilt text-center">
+      <h4 class="font-bold heading mb-3 text-sm">Forms used in this carousel</h4>
+      <div class="donut"><div class="donut-hole heading">100%</div></div>
+      <div class="mt-4 space-y-1 text-xs text-left inline-block">
+        <p><span class="inline-block w-3 h-3 rounded-sm align-middle" style="background:var(--accent)"></span> Gerund examples &mdash; 60%</p>
+        <p><span class="inline-block w-3 h-3 rounded-sm align-middle" style="background:var(--accent2)"></span> Infinitive examples &mdash; 25%</p>
+        <p><span class="inline-block w-3 h-3 rounded-sm align-middle" style="background:var(--accent3)"></span> Both forms &mdash; 15%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GALERÍA ===== -->
+<section id="galeria" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-images accent"></i><h3 class="text-lg font-bold heading">Galería del proyecto</h3></div>
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card1.jpg" alt="Tarjeta 1" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card2.jpg" alt="Tarjeta 2" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card3.jpg" alt="Tarjeta 3" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card4.jpg" alt="Tarjeta 4" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card5.jpg" alt="Tarjeta 5" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+    <figure class="surface rounded-xl overflow-hidden btn"><img src="https://oscidec.com/portafolio/card6.jpg" alt="Tarjeta 6" loading="lazy" class="w-full h-32 sm:h-40 object-cover"></figure>
+  </div>
+  <figure class="surface rounded-xl overflow-hidden mt-3 btn"><img src="https://oscidec.com/portafolio/infociber.jpg" alt="Infografía ciberseguridad" loading="lazy" class="w-full object-cover"><figcaption class="text-xs muted p-2 text-center">Infografía de apoyo — Ciberseguridad</figcaption></figure>
+</section>
+
+<!-- ===== VIDEO + PDF (aside) ===== -->
+<section id="recursos" class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-2 surface rounded-2xl p-4">
+    <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-film accent"></i><h3 class="text-lg font-bold heading">Video de presentación</h3></div>
+    <video controls preload="metadata" playsinline class="w-full rounded-xl border" style="border-color:var(--accent)">
+      <source src="https://oscidec.com/portafolio/ingles.mp4" type="video/mp4">
+      Tu navegador no soporta video HTML5.
+    </video>
+  </div>
+  <aside class="surface rounded-2xl p-4 flex flex-col">
+    <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-file-pdf accent"></i><h3 class="text-lg font-bold heading">Material PDF</h3></div>
+    <p class="text-sm muted flex-1">Documento complementario con la teoría de gerundios e infinitivos aplicada a la ciberseguridad.</p>
+    <div class="mt-3 space-y-2">
+      <a href="https://oscidec.com/portafolio/ciber.pdf" target="_blank" rel="noopener noreferrer" class="btn block text-center bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold text-sm py-2.5 rounded-xl"><i class="fa-solid fa-up-right-from-square mr-1"></i> Abrir PDF</a>
+      <a href="https://oscidec.com/portafolio/ciber.pdf" download class="btn block text-center surface font-bold text-sm py-2.5 rounded-xl accent"><i class="fa-solid fa-download mr-1"></i> Descargar</a>
+    </div>
+  </aside>
+</section>
+<!-- ===== FAQ ===== -->
+<section id="faq" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-circle-question accent"></i><h3 class="text-lg font-bold heading">Preguntas frecuentes (FAQ)</h3></div>
+  <div class="space-y-3">
+    <div class="faq-item surface rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex justify-between items-center gap-3 p-4 text-left font-semibold heading text-sm"><span>¿Cuál es la diferencia básica entre gerundio e infinitivo?</span><i class="fa-solid fa-chevron-down faq-chevron accent"></i></button><div class="faq-a px-4"><p class="pb-4 text-sm muted">El gerundio termina en <strong>-ing</strong> y funciona como sustantivo (enjoy <em>testing</em>). El infinitivo usa <strong>to + verbo</strong> y suele indicar intención o propósito (want <em>to test</em>).</p></div></div>
+    <div class="faq-item surface rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex justify-between items-center gap-3 p-4 text-left font-semibold heading text-sm"><span>¿Qué verbos van seguidos de gerundio?</span><i class="fa-solid fa-chevron-down faq-chevron accent"></i></button><div class="faq-a px-4"><p class="pb-4 text-sm muted">Algunos comunes: avoid, consider, enjoy, finish, keep, mind, practise, risk, suggest. Ej.: “She avoids <em>opening</em> suspicious links.”</p></div></div>
+    <div class="faq-item surface rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex justify-between items-center gap-3 p-4 text-left font-semibold heading text-sm"><span>¿Y cuáles van seguidos de infinitivo?</span><i class="fa-solid fa-chevron-down faq-chevron accent"></i></button><div class="faq-a px-4"><p class="pb-4 text-sm muted">agree, decide, expect, hope, learn, plan, promise, want. Ej.: “We <em>plan to perform</em> a security audit.”</p></div></div>
+    <div class="faq-item surface rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex justify-between items-center gap-3 p-4 text-left font-semibold heading text-sm"><span>¿Puedo usar el chatbot para practicar?</span><i class="fa-solid fa-chevron-down faq-chevron accent"></i></button><div class="faq-a px-4"><p class="pb-4 text-sm muted">Sí. Abre el chat (abajo a la derecha) y escribe “gerundio”, “infinitivo”, “ejemplos” o “quiz” para recibir respuestas al instante.</p></div></div>
+  </div>
+</section>
+
+<!-- ===== PORTAFOLIO (visual preview) ===== -->
+<section id="portafolio" class="mt-10">
+  <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-user-astronaut accent"></i><h3 class="text-lg font-bold heading">My Portfolio &mdash; Rafael González</h3></div>
+  <article class="surface rounded-2xl p-4 tilt">
+    <p class="text-sm muted mb-3">A live, embedded preview of my personal portfolio. You can scroll inside the frame or open it full screen.</p>
+    <div class="rounded-xl overflow-hidden border" style="border-color:var(--accent)">
+      <iframe src="https://rafaelgonzalezm507-byte.github.io/portafolio/" title="Portafolio Rafael González" loading="lazy" class="w-full" style="height:70vh;min-height:420px;border:0;background:#fff" referrerpolicy="no-referrer"></iframe>
+    </div>
+    <div class="flex flex-wrap gap-2 mt-3 justify-center">
+      <a href="https://rafaelgonzalezm507-byte.github.io/portafolio/" target="_blank" rel="noopener noreferrer" class="btn jump bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-black text-sm px-5 py-3 rounded-xl"><i class="fa-solid fa-up-right-from-square mr-1"></i> Open full portfolio</a>
+      <a href="https://oscidec.com" target="_blank" rel="noopener noreferrer" class="btn jump surface accent font-black text-sm px-5 py-3 rounded-xl"><i class="fa-solid fa-globe mr-1"></i> oscidec.com</a>
+    </div>
+    <p class="text-[11px] muted text-center mt-2">If the preview does not load, your browser or GitHub Pages may block embedding &mdash; use the button to open it directly.</p>
+  </article>
+</section>
+
+<!-- ===== PLATAFORMAS ===== -->
+<section id="plataformas" class="mt-10 surface rounded-2xl p-5 text-center">
+  <span class="inline-block bg-gradient-to-r from-sky-500 to-cyan-600 text-white text-[11px] font-black px-3 py-1 rounded uppercase">🚀 Portafolio OSCIDEC</span>
+  <h3 class="text-xl font-bold heading mt-2">Explora las plataformas activas</h3>
+  <div class="flex flex-wrap justify-center gap-2 mt-4">
+    <a href="https://ingles.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-cy text-white font-black text-xs px-4 py-3 rounded-xl">Inglés</a>
+    <a href="https://informacion.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-tl font-black text-xs px-4 py-3 rounded-xl">Información</a>
+    <a href="https://debatemina.vercel.app" target="_blank" rel="noopener noreferrer" class="os-btn btn c-rs text-white font-black text-xs px-4 py-3 rounded-xl">Debate Mina</a>
+    <a href="https://formacionciudadana.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-vi text-white font-black text-xs px-4 py-3 rounded-xl">Formación Ciudadana</a>
+    <a href="https://analisisetica.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-gr font-black text-xs px-4 py-3 rounded-xl">Análisis Ética</a>
+    <a href="https://estructura.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-cy text-white font-black text-xs px-4 py-3 rounded-xl">Estructura</a>
+    <a href="https://design.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-tl font-black text-xs px-4 py-3 rounded-xl">Design</a>
+    <a href="https://matematica.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-rs text-white font-black text-xs px-4 py-3 rounded-xl">Matemática</a>
+    <a href="https://estructurasdiscretas.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-vi text-white font-black text-xs px-4 py-3 rounded-xl">Estructuras Discretas</a>
+    <a href="https://final.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-gr font-black text-xs px-4 py-3 rounded-xl">Final</a>
+    <a href="https://deliciasgeorgina.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-cy text-white font-black text-xs px-4 py-3 rounded-xl">Delicias Georgina</a>
+    <a href="https://georginaitzel.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-tl font-black text-xs px-4 py-3 rounded-xl">Georgina Itzel</a>
+    <a href="https://proyectofinal.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-rs text-white font-black text-xs px-4 py-3 rounded-xl">Proyecto Final</a>
+    <a href="https://esenciasdelmundo.oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-vi text-white font-black text-xs px-4 py-3 rounded-xl">Esencias del Mundo</a>
+    <a href="https://oscidec.com" target="_blank" rel="noopener noreferrer" class="os-btn btn c-gr font-black text-xs px-4 py-3 rounded-xl">🌐 Sitio OSCIDEC</a>
+  </div>
+</section>
+
+<!-- ===== CONTACTO ===== -->
+<section id="contacto" class="mt-10 surface rounded-2xl p-5 text-center">
+  <h3 class="text-xl font-bold heading">Canales de atención directa</h3>
+  <p class="text-sm muted mt-1">Únete a los canales y escríbeme por WhatsApp.</p>
+  <div class="flex flex-wrap justify-center gap-2 mt-4">
+    <a href="https://wa.me/50767600882" target="_blank" rel="noopener noreferrer" class="btn jump bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-sm px-5 py-3 rounded-xl"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp 6760-0882</a>
+    <a href="https://t.me/Ciberseguridadpa/1" target="_blank" rel="noopener noreferrer" class="btn jump bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-black text-sm px-5 py-3 rounded-xl"><i class="fa-brands fa-telegram mr-1"></i> Telegram</a>
+    <a href="https://discord.gg/xPa6zSpTq" target="_blank" rel="noopener noreferrer" class="btn jump bg-gradient-to-r from-indigo-400 to-indigo-600 text-white font-black text-sm px-5 py-3 rounded-xl"><i class="fa-brands fa-discord mr-1"></i> Discord</a>
+    <a href="https://ingles.oscidec.com" target="_blank" rel="noopener noreferrer" class="btn jump surface accent font-black text-sm px-5 py-3 rounded-xl"><i class="fa-solid fa-language mr-1"></i> ingles.oscidec.com</a>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="surface border-t mt-10 px-5 py-6 text-center" style="border-color:var(--border)">
+  <div class="flex items-center justify-center gap-3 mb-2">
+    <img src="https://oscidec.com/portafolio/udelistmo.jpg" alt="UDI" class="w-8 h-8 rounded object-cover">
+    <img src="https://oscidec.com/portafolio/oscidec.jpg" alt="OSCIDEC" class="w-8 h-8 rounded object-cover">
+  </div>
+  <p class="text-sm heading font-semibold">Gerund &amp; Infinitive — Digital Carousel</p>
+  <p class="text-xs muted mt-1">Student: Rafael Martín González Mojica • Professor: Miguel Fernando Sánchez Pérez</p>
+  <p class="text-xs muted">English VI • B.Sc. Cybersecurity Engineering • Universidad del Istmo</p>
+  <a href="https://oscidec.com" target="_blank" rel="noopener noreferrer" class="text-xs accent">https://oscidec.com</a>
+  <p class="text-[11px] muted mt-2">© 2026 OSCIDEC. Hecho con HTML5, CSS3, Tailwind y JavaScript.</p>
+</footer>
+
+</div><!-- /flex-1 -->
+</div><!-- /layout wrapper -->
+<!-- ===== CHATBOT IA ===== -->
+<button id="chatToggle" onclick="toggleChat()" class="btn fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-sky-500 to-cyan-600 text-white text-2xl shadow-2xl flex items-center justify-center" aria-label="Abrir chat">
+  <i class="fa-solid fa-robot"></i>
+</button>
+<div id="chatPanel" class="fixed bottom-24 right-5 z-50 w-[92vw] max-w-sm surface rounded-2xl shadow-2xl overflow-hidden origin-bottom-right opacity-0 scale-95 pointer-events-none">
+  <div class="flex items-center gap-3 p-4 bg-gradient-to-r from-sky-500 to-cyan-600 text-white">
+    <i class="fa-solid fa-robot text-xl"></i>
+    <div class="leading-tight"><p class="font-bold text-sm">Asistente Grammar IA</p><p class="text-[11px] opacity-90">Gerund &amp; Infinitive • en línea</p></div>
+    <button onclick="toggleChat()" class="ml-auto text-white/90"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="chatBody" class="p-3 space-y-2 h-72 overflow-y-auto text-sm"></div>
+  <div class="p-2 flex flex-wrap gap-1.5 border-t" style="border-color:var(--border)" id="chatChips">
+    <button onclick="quickAsk('gerundio')" class="text-[11px] surface px-2 py-1 rounded-lg accent">Gerundio</button>
+    <button onclick="quickAsk('infinitivo')" class="text-[11px] surface px-2 py-1 rounded-lg accent">Infinitivo</button>
+    <button onclick="quickAsk('ejemplos')" class="text-[11px] surface px-2 py-1 rounded-lg accent">Ejemplos</button>
+    <button onclick="quickAsk('quiz')" class="text-[11px] surface px-2 py-1 rounded-lg accent">Quiz</button>
+  </div>
+  <form onsubmit="sendChat(event)" class="p-2 flex gap-2 border-t" style="border-color:var(--border)">
+    <input id="chatInput" type="text" placeholder="Escribe tu pregunta…" autocomplete="off" class="flex-1 surface rounded-xl px-3 py-2 text-sm outline-none">
+    <button type="submit" class="btn bg-gradient-to-r from-sky-500 to-cyan-600 text-white w-10 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
+  </form>
+</div>
+<script>
+/* ===== THEME SWITCHER ===== */
+const THEMES=['cyber','aurora','sunset','forest'];
+const THEME_LABELS={cyber:'Cyber',aurora:'Aurora',sunset:'Sunset',forest:'Forest'};
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('themeName').textContent=THEME_LABELS[t]||t;
+  try{localStorage.setItem('osc_theme',t);}catch(e){}
+}
+function cycleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
+  setTheme(next);
+}
+try{const saved=localStorage.getItem('osc_theme'); if(saved) setTheme(saved);}catch(e){}
+
+/* ===== SIDEBAR ===== */
+function toggleSidebar(open){
+  const sb=document.getElementById('sidebar'), ov=document.getElementById('overlay');
+  if(open){sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden');}
+  else{sb.classList.add('-translate-x-full'); ov.classList.add('hidden');}
+}
+
+/* ===== PERFIL COMO BINARIO (blob) ===== */
+(function(){
+  const url='https://oscidec.com/portafolio/perfil.jpg';
+  const img=document.getElementById('perfilImg');
+  fetch(url,{mode:'cors'}).then(r=>{if(!r.ok)throw 0;return r.blob();})
+    .then(b=>{img.src=URL.createObjectURL(b);})
+    .catch(()=>{img.src=url;});
+})();
+
+/* ===== CAROUSEL ===== */
+let currentSlide=0;
+const track=document.getElementById('carouselTrack');
+const slides=Array.from(track.children);
+const totalSlides=slides.length;
+const indicators=document.getElementById('indicators');
+for(let i=0;i<totalSlides;i++){
+  const dot=document.createElement('button');
+  dot.onclick=()=>goToSlide(i);
+  indicators.appendChild(dot);
+}
+function updateCarousel(){
+  track.style.transform=`translateX(-${currentSlide*100}%)`;
+  document.getElementById('prevBtn').disabled=currentSlide===0;
+  document.getElementById('nextBtn').disabled=currentSlide===totalSlides-1;
+  document.getElementById('slideCounter').textContent=String(currentSlide+1).padStart(2,'0')+' / '+String(totalSlides).padStart(2,'0');
+  slides.forEach((s,i)=>s.classList.toggle('is-active',i===currentSlide));
+  Array.from(indicators.children).forEach((d,i)=>{
+    d.className=i===currentSlide?'w-6 h-2.5 rounded-full transition-all':'w-2.5 h-2.5 rounded-full transition-all';
+    d.style.background=i===currentSlide?'var(--accent)':'var(--border)';
+  });
+}
+function moveSlide(dir){currentSlide=Math.max(0,Math.min(totalSlides-1,currentSlide+dir));updateCarousel();}
+function goToSlide(i){currentSlide=i;updateCarousel();}
+updateCarousel();
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')moveSlide(-1);if(e.key==='ArrowRight')moveSlide(1);});
+/* swipe */
+let tsx=0;
+track.addEventListener('touchstart',e=>tsx=e.changedTouches[0].clientX,{passive:true});
+track.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tsx; if(Math.abs(dx)>50)moveSlide(dx<0?1:-1);},{passive:true});
+
+function toggleAnswers(){document.querySelectorAll('.answer').forEach(a=>a.classList.toggle('hidden'));}
+
+/* ===== BUSCADOR INTERNO (client-side) ===== */
+const searchData=slides.map((s,i)=>({i,title:s.dataset.title||('Card '+(i+1)),kw:((s.dataset.title||'')+' '+(s.dataset.kw||'')+' '+s.textContent).toLowerCase()}));
+function runSearch(q){
+  const box=document.getElementById('searchResults');
+  q=(q||'').trim().toLowerCase();
+  if(!q){box.classList.add('hidden');box.innerHTML='';return;}
+  const hits=searchData.filter(d=>d.kw.includes(q)).slice(0,8);
+  if(!hits.length){box.innerHTML='<div class="p-3 text-sm muted">Sin resultados</div>';box.classList.remove('hidden');return;}
+  box.innerHTML=hits.map(h=>`<div class="search-hit p-3 text-sm border-b" style="border-color:var(--border)" onclick="jumpTo(${h.i})"><span class="accent font-semibold">Card ${String(h.i+1).padStart(2,'0')}</span> · ${h.title}</div>`).join('');
+  box.classList.remove('hidden');
+}
+function jumpTo(i){goToSlide(i);document.getElementById('searchResults').classList.add('hidden');document.getElementById('searchInput').value='';document.getElementById('carrusel').scrollIntoView({behavior:'smooth'});}
+document.addEventListener('click',e=>{if(!e.target.closest('#searchInput')&&!e.target.closest('#searchResults'))document.getElementById('searchResults').classList.add('hidden');});
+
+/* ===== FAQ ===== */
+function toggleFaq(btn){btn.closest('.faq-item').classList.toggle('open');}
+
+/* ===== CHATBOT IA (respuestas locales) ===== */
+function toggleChat(){
+  const p=document.getElementById('chatPanel');
+  const open=p.classList.contains('opacity-0');
+  if(open){p.classList.remove('opacity-0','scale-95','pointer-events-none');p.classList.add('opacity-100','scale-100');
+    if(!document.getElementById('chatBody').dataset.init){document.getElementById('chatBody').dataset.init=1;botSay('¡Hola! 👋 Soy tu asistente de gramática. Pregúntame por "gerundio", "infinitivo", "diferencia", "ejemplos", "quiz" o escribe tu duda.');}
+  }else{p.classList.add('opacity-0','scale-95','pointer-events-none');p.classList.remove('opacity-100','scale-100');}
+}
+function addMsg(html,who){
+  const b=document.getElementById('chatBody');
+  const wrap=document.createElement('div');
+  wrap.className='msg-in flex '+(who==='me'?'justify-end':'justify-start');
+  wrap.innerHTML=`<div class="max-w-[80%] px-3 py-2 rounded-2xl ${who==='me'?'bg-gradient-to-r from-sky-500 to-cyan-600 text-white rounded-br-sm':'surface rounded-bl-sm'}">${html}</div>`;
+  b.appendChild(wrap);b.scrollTop=b.scrollHeight;
+}
+function botSay(html){
+  const b=document.getElementById('chatBody');
+  const t=document.createElement('div');t.className='flex justify-start msg-in';
+  t.innerHTML='<div class="surface rounded-2xl rounded-bl-sm px-3 py-2 typing"><span></span><span></span><span></span></div>';
+  b.appendChild(t);b.scrollTop=b.scrollHeight;
+  setTimeout(()=>{t.remove();addMsg(html,'bot');},500);
+}
+const KB=[
+  {k:['gerund','gerundio','-ing','ing'],a:'Un <b>gerundio</b> es el verbo + <b>-ing</b> funcionando como sustantivo.<br>Ej.: <i>Encrypting</i> data prevents attacks · She enjoys <i>analyzing</i> logs.'},
+  {k:['infinit','to '],a:'El <b>infinitivo</b> es <b>to + verbo base</b>, suele expresar intención o propósito.<br>Ej.: We want <i>to secure</i> the system · I ran it <i>to scan</i> the ports.'},
+  {k:['diferencia','vs','compar','differ'],a:'<b>Gerundio</b> = foco en la acción (She enjoys <i>testing</i>).<br><b>Infinitivo</b> = foco en la intención (She wants <i>to test</i>).<br>Con <i>stop</i>: "stopped <i>using</i>" (dejó de) vs "stopped <i>to check</i>" (se detuvo para).'},
+  {k:['verbo gerund','avoid','enjoy','finish','practise','suggest','consider'],a:'Verbos + gerundio: avoid, consider, enjoy, finish, keep, mind, practise, risk, suggest.<br>Ej.: Admins must <i>avoid using</i> default passwords.'},
+  {k:['verbo infinit','want','decide','plan','hope','promise','agree','expect'],a:'Verbos + infinitivo: agree, decide, expect, hope, learn, plan, promise, want.<br>Ej.: We <i>plan to perform</i> an audit.'},
+  {k:['ejemplo','example'],a:'Gerundio: <i>Monitoring</i> traffic is essential.<br>Infinitivo: The team decided <i>to patch</i> the server.'},
+  {k:['quiz','practica','practice','ejercicio','reto','challenge'],a:'🗣 Completa: "The engineer decided ____ (deploy) the patch." → <b>to deploy</b>. ¡Ve a la Card 09 para más retos!'},
+  {k:['whatsapp','contacto','telefono'],a:'Puedes escribirme por WhatsApp al <b>6760-0882</b> 🟢 (botón verde en la barra lateral y en Contacto).'},
+  {k:['ingles','subdomin','web'],a:'Visita <b>ingles.oscidec.com</b> desde el botón "Ir a Inglés". Todo el portafolio está en la sección Plataformas.'},
+  {k:['hola','buenas','hi','hello','saludos'],a:'¡Hola! 😊 ¿Quieres repasar gerundios, infinitivos o hacer el quiz?'},
+  {k:['gracias','thanks'],a:'¡De nada! 🙌 Mucha suerte con tu presentación de English VI.'}
+];
+function answer(q){
+  q=q.toLowerCase();
+  for(const e of KB){if(e.k.some(k=>q.includes(k)))return e.a;}
+  return 'Puedo ayudarte con: <b>gerundio</b>, <b>infinitivo</b>, <b>diferencia</b>, <b>ejemplos</b> o <b>quiz</b>. ¿Cuál te interesa?';
+}
+function sendChat(ev){ev.preventDefault();const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;addMsg(v.replace(/</g,'&lt;'),'me');inp.value='';botSay(answer(v));}
+function quickAsk(q){addMsg(q,'me');botSay(answer(q));}
+
+/* ===== ANIMATE BARS ON SCROLL ===== */
+const barObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.style.width=e.target.dataset.w;barObs.unobserve(e.target);}});
+},{threshold:.4});
+document.querySelectorAll('.bar-fill').forEach(b=>barObs.observe(b));
+
+/* ===== 3D TILT (mouse) ===== */
+document.querySelectorAll('.tilt').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+    el.style.transform=`perspective(900px) rotateX(${(-py*6).toFixed(2)}deg) rotateY(${(px*6).toFixed(2)}deg) translateZ(6px)`;
+  });
+  el.addEventListener('mouseleave',()=>{el.style.transform='';});
+});
+</script>
+</body>
+</html>
